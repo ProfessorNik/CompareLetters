@@ -1,4 +1,4 @@
-package com.github.professornik
+package com.github.professornik.compareletters
 
 import nu.pattern.OpenCV
 import java.awt.Color

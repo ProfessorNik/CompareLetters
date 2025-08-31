@@ -1,9 +1,9 @@
-package com.github.professornik.attempts
+package com.github.professornik.compareletters.attempts
 
 import org.opencv.core.*
 import org.opencv.highgui.HighGui
 import org.opencv.imgproc.Imgproc
-import com.github.professornik.renderGlyph
+import com.github.professornik.compareletters.renderGlyph
 import kotlin.math.abs
 
 fun compareLettersAdvanced(text1: String, text2: String): Double {

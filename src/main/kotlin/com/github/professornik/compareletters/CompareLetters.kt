@@ -1,4 +1,4 @@
-package com.github.professornik
+package com.github.professornik.compareletters
 
 import nu.pattern.OpenCV
 import org.opencv.core.*
@@ -108,4 +108,15 @@ private fun sample() {
     ).forEach {
         println("${it.first} ${it.second} Сравнение контуров=${compareLetters(it.first, it.second)}")
     }
+
+    /**
+     * Вывод
+     * р q Сравнение контуров=0.017349567997407528
+     * ф cp Сравнение контуров=1.9398059336569686
+     * П ГI Сравнение контуров=2.7782174817415184
+     * F Г- Сравнение контуров=4.99198573739263
+     * m rn Сравнение контуров=0.4281385269960267
+     * Ш LLI Сравнение контуров=2.476034973308238
+     * A гр Сравнение контуров=11.938828761076126
+     */
 }
