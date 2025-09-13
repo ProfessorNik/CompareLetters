@@ -16,36 +16,33 @@ import javax.imageio.ImageIO
  * @return число большее 0, чем ближе к 0 тем более похожи последовательности
  * @sample sample
  */
-fun compareLetters(text1: String, text2: String): Double {
-    // 1. Рендеринг и подготовка изображений
-    val imgColor1 = renderGlyph(text1).toMat()
-    val imgColor2 = renderGlyph(text2).toMat()
-
-    if (imgColor1.empty() || imgColor2.empty()) {
-        throw IllegalStateException("Не удалось загрузить одно из изображений.")
-    }
-
-    // 2. Преобразование в grayscale и бинаризация
-    val img1 = Mat()
-    val img2 = Mat()
-    Imgproc.cvtColor(imgColor1, img1, Imgproc.COLOR_BGR2GRAY)
-    Imgproc.cvtColor(imgColor2, img2, Imgproc.COLOR_BGR2GRAY)
-
-
-    val threshold1 = Mat()
-    val threshold2 = Mat()
-    Imgproc.threshold(img1, threshold1, 0.0, 255.0, Imgproc.THRESH_BINARY or Imgproc.THRESH_OTSU)
-    Imgproc.threshold(img2, threshold2, 0.0, 255.0, Imgproc.THRESH_BINARY or Imgproc.THRESH_OTSU)
-
-    // 3. Поиск контуров и их объединение в один контур
-    val (contours1, _) = findContours(threshold1)
-        .combineContours()
-    val (contours2, _) = findContours(threshold2)
-        .combineContours()
+fun compareLetters(text1: String, text2: String, cache: Cache<String, ContoursWithHierarchy> = emptyCache()): Double {
+    val (contours1, _) = cache(text1, ::findContour)
+    val (contours2, _) = cache(text2, ::findContour)
 
     // 4. Сравнение контуров методом моментов HU
     return Imgproc.matchShapes(contours1[0], contours2[0], Imgproc.CONTOURS_MATCH_I1, 0.0)
 }
+
+private fun findContour(text: String): ContoursWithHierarchy {
+    // 1. Рендеринг и подготовка изображений
+    val imgColor = renderGlyph(text).toMat()
+    if (imgColor.empty()) {
+        throw IllegalStateException("Не удалось загрузить одно из изображений.")
+    }
+
+    // 2. Преобразование в grayscale и бинаризация
+    val img = Mat()
+    Imgproc.cvtColor(imgColor, img, Imgproc.COLOR_BGR2GRAY)
+
+    val threshold1 = Mat()
+    Imgproc.threshold(img, threshold1, 0.0, 255.0, Imgproc.THRESH_BINARY or Imgproc.THRESH_OTSU)
+
+    // 3. Поиск контуров и их объединение в один контур
+    return findContours(threshold1)
+        .combineContours()
+}
+
 
 private fun findContours(
     image: Mat
@@ -73,7 +70,19 @@ private fun findContours(
     )
 }
 
-private data class ContoursWithHierarchy(
+private class ContoursWithHierarchyMapCache : Cache<String, ContoursWithHierarchy> {
+    val cache: MutableMap<String, ContoursWithHierarchy> = mutableMapOf()
+
+    override fun get(key: String): ContoursWithHierarchy? {
+        return cache[key];
+    }
+
+    override fun set(key: String, value: ContoursWithHierarchy) {
+        cache.put(key, value)
+    }
+}
+
+data class ContoursWithHierarchy(
     val contours: List<MatOfPoint>,
     val hierarchy: Mat,
 )
