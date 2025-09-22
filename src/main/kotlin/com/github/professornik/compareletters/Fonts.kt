@@ -2,15 +2,30 @@ package com.github.professornik.compareletters
 
 import java.awt.Font
 
-fun robotoRegular(
-    fontSize: Float = 16f,
-): Font {
-    return (object {}::class as Any).javaClass.getResourceAsStream("/Roboto-Regular.ttf").use { fontFile ->
+typealias GetFont = (fontSize: Float) -> Font
+
+fun font(fontSize: Float, fontName: FontName) : Font {
+    val getFont = when (fontName) {
+        FontName.ROBOTO_REGULAR -> robotoRegular
+        FontName.ARIAL -> arial
+    }
+
+    return getFont(fontSize)
+}
+
+
+enum class FontName {
+    ROBOTO_REGULAR,
+    ARIAL,
+}
+
+val robotoRegular : GetFont = { fontSize ->
+    (object {}::class as Any).javaClass.getResourceAsStream("/Roboto-Regular.ttf").use { fontFile ->
         Font.createFont(Font.TRUETYPE_FONT, fontFile)
             .deriveFont(fontSize)
     }
 }
 
-fun arial(): Font {
-    return Font("Arial", Font.PLAIN, 100)
+val arial : GetFont = { fontSize ->
+    Font("Arial", Font.PLAIN, fontSize.toInt())
 }

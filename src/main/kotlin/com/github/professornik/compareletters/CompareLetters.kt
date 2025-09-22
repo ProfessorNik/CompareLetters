@@ -1,32 +1,49 @@
 package com.github.professornik.compareletters
 
 import nu.pattern.OpenCV
-import org.opencv.core.*
+import org.opencv.core.Mat
+import org.opencv.core.MatOfByte
+import org.opencv.core.MatOfPoint
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgproc.Imgproc
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 
+data class ComparedTexts(
+    val text1: String,
+    val text2: String,
+    val huInvariants: Double,
+)
+
 /**
  * Сравнивает две последовательности букв. Используется метод моментов Ху для сравнения контуров букв.
- * 
+ *
  * @param text1 первая последовательность
  * @param text2 вторая последовательность
  * @return число большее 0, чем ближе к 0 тем более похожи последовательности
  * @sample sample
  */
-fun compareLetters(text1: String, text2: String, cache: Cache<String, ContoursWithHierarchy> = emptyCache()): Double {
-    val (contours1, _) = cache(text1, ::findContour)
-    val (contours2, _) = cache(text2, ::findContour)
+fun compareTexts(
+    text1: String,
+    text2: String,
+    cache: Cache<String, ContoursWithHierarchy> = emptyCache(),
+    config: GeneralConfig = GeneralConfig()
+): ComparedTexts {
+    val (contours1, _) = cache(text1) { missed -> findContour(missed, config) }
+    val (contours2, _) = cache(text2) { missed -> findContour(missed, config) }
 
     // 4. Сравнение контуров методом моментов HU
-    return Imgproc.matchShapes(contours1[0], contours2[0], Imgproc.CONTOURS_MATCH_I1, 0.0)
+    return ComparedTexts(
+        text1,
+        text2,
+        Imgproc.matchShapes(contours1[0], contours2[0], Imgproc.CONTOURS_MATCH_I1, 0.0),
+    )
 }
 
-private fun findContour(text: String): ContoursWithHierarchy {
+private fun findContour(text: String, config: GeneralConfig): ContoursWithHierarchy {
     // 1. Рендеринг и подготовка изображений
-    val imgColor = renderGlyph(text).toMat()
+    val imgColor = renderGlyph(text, config.renderGlyphConfig).toMat()
     if (imgColor.empty()) {
         throw IllegalStateException("Не удалось загрузить одно из изображений.")
     }
@@ -70,18 +87,6 @@ private fun findContours(
     )
 }
 
-private class ContoursWithHierarchyMapCache : Cache<String, ContoursWithHierarchy> {
-    val cache: MutableMap<String, ContoursWithHierarchy> = mutableMapOf()
-
-    override fun get(key: String): ContoursWithHierarchy? {
-        return cache[key];
-    }
-
-    override fun set(key: String, value: ContoursWithHierarchy) {
-        cache.put(key, value)
-    }
-}
-
 data class ContoursWithHierarchy(
     val contours: List<MatOfPoint>,
     val hierarchy: Mat,
@@ -115,7 +120,7 @@ private fun sample() {
         "Ш" to "LLI",
         "A" to "гр"
     ).forEach {
-        println("${it.first} ${it.second} Сравнение контуров=${compareLetters(it.first, it.second)}")
+        println("${it.first} ${it.second} Сравнение контуров=${compareTexts(it.first, it.second)}")
     }
 
     /**
@@ -129,3 +134,4 @@ private fun sample() {
      * A гр Сравнение контуров=11.938828761076126
      */
 }
+

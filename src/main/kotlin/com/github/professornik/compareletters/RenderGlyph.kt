@@ -5,11 +5,30 @@ import java.awt.Font
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 
+data class RenderGlyphConfig(
+    val fontSize: Float = 16F,
+    val fontName: FontName = FontName.ROBOTO_REGULAR,
+    val width: Int = 32,
+    val height: Int = 32
+)
+
 fun renderGlyph(
     text: String,
-    font: Font = robotoRegular(),
-    width: Int = 30,
-    height: Int = 30
+    renderGlyphConfig: RenderGlyphConfig,
+) = with(renderGlyphConfig) {
+    renderGlyph(
+        text,
+        font(fontSize, fontName),
+        width,
+        height,
+    )
+}
+
+fun renderGlyph(
+    text: String,
+    font: Font = font(16F, FontName.ROBOTO_REGULAR),
+    width: Int = 32,
+    height: Int = 32
 ): BufferedImage {
     val image = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
     val g2d = image.createGraphics()
