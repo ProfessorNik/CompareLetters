@@ -3,7 +3,7 @@ package com.github.professornik.compareletters.attempts
 import org.opencv.core.*
 import org.opencv.highgui.HighGui
 import org.opencv.imgproc.Imgproc
-import com.github.professornik.compareletters.renderGlyph
+import com.github.professornik.compareletters.domain.renderGlyph
 import kotlin.math.abs
 
 fun compareLettersAdvanced(text1: String, text2: String): Double {

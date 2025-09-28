@@ -5,7 +5,7 @@ import org.opencv.core.MatOfByte
 import org.opencv.core.MatOfDouble
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgproc.Imgproc
-import com.github.professornik.compareletters.renderGlyph
+import com.github.professornik.compareletters.domain.renderGlyph
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO

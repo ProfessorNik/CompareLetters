@@ -1,42 +1,14 @@
 package com.github.professornik.compareletters
 
-import nu.pattern.OpenCV
-
-val uppercaseLetters = ('A'..'Z').toList()  // A, B, C, ..., Z
-val lowercaseLetters = ('a'..'z').toList()  // a, b, c, ..., z
-
-val letters = uppercaseLetters + lowercaseLetters
-
-val allPairs = listOf(
-    "р" to "q",
-    "ф" to "cp",
-    "П" to "ГI",
-    "F" to "Г-",
-    "m" to "rn",
-    "Ш" to "LLI",
-    "Ш" to "XYZ",
-    "A" to "гр"
-)
+import com.github.professornik.compareletters.dao.common.DbConfig
+import com.github.professornik.compareletters.dao.common.DbMigrationConfig
+import com.github.professornik.compareletters.domain.FontName
+import com.github.professornik.compareletters.domain.RenderGlyphConfig
 
 fun main() {
-    OpenCV.loadLocally();
-
-    val pairs = allPairs
-
-    pairs.forEach {
-        println("${it.first} ${it.second} Сравнение контуров=${compareTexts(text1 = it.first, text2 = it.second, config = config)}")
-//        ImageIO.write(renderGlyph(it.first, config.renderGlyphConfig), "PNG", File("./images/${it.first}.png"));
-//        ImageIO.write(renderGlyph(it.second, config.renderGlyphConfig), "PNG", File("./images/${it.second}.png"));
-    }
-}
-
-fun unicodeSequence(): Sequence<String> = sequence {
-    for (codePoint in 0..0x10FFFF) {
-        if (Character.isValidCodePoint(codePoint)) {
-            val chars = Character.toChars(codePoint)
-            yield(String(chars))
-        }
-    }
+    val applicationContext = ApplicationContext(config)
+    applicationContext.initContext()
+    applicationContext.comparedLettersService.compareLetters()
 }
 
 private val config: GeneralConfig = GeneralConfig(
@@ -45,5 +17,13 @@ private val config: GeneralConfig = GeneralConfig(
         fontName = FontName.ROBOTO_REGULAR,
         width = 200,
         height = 200,
+    ),
+    dbConfig = DbConfig(
+        jdbcUrl = "jdbc:postgresql://localhost:5432/compare_letters",
+        username = "postgres",
+        password = "admin",
+    ),
+    dbMigrationConfig = DbMigrationConfig(
+        changeLogFile = "/db/changelog/changelog.xml"
     )
 )

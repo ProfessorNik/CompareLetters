@@ -3,7 +3,7 @@ package com.github.professornik.compareletters.attempts
 import io.github.t12y.ssim.SSIM
 import io.github.t12y.ssim.models.Matrix
 import io.github.t12y.ssim.models.Options
-import com.github.professornik.compareletters.renderGlyph
+import com.github.professornik.compareletters.domain.renderGlyph
 import java.awt.image.BufferedImage
 
 fun ssim(text1: String, text2: String): Double {

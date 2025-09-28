@@ -1,4 +1,4 @@
-package com.github.professornik.compareletters
+package com.github.professornik.compareletters.domain
 
 import java.awt.Color
 import java.awt.Font

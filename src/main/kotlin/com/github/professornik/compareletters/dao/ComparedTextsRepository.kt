@@ -1,14 +1,13 @@
 package com.github.professornik.compareletters.dao
 
-import com.github.professornik.compareletters.ComparedTexts
-import com.github.professornik.compareletters.GeneralConfig
+import com.github.professornik.compareletters.domain.ComparedTexts
+import com.github.professornik.compareletters.dao.common.ConnectionProvider
 
 class ComparedTextsRepository(
-    val generalConfig: GeneralConfig,
-    // подключаем постгрес
+    val connectionProvider: ConnectionProvider,
 ) {
 
-    fun save(comparedTexts: ComparedTexts) {
+    fun save(comparedTexts: ComparedTexts) = connectionProvider.transaction { connection ->
 
     }
 }

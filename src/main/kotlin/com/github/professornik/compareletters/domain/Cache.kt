@@ -1,4 +1,4 @@
-package com.github.professornik.compareletters
+package com.github.professornik.compareletters.domain
 
 interface Cache<K, V>: (K, (K) -> V) -> V {
     fun get(key: K): V?
