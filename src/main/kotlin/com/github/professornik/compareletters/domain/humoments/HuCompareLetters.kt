@@ -1,6 +1,9 @@
-package com.github.professornik.compareletters.domain
+package com.github.professornik.compareletters.domain.humoments
 
 import com.github.professornik.compareletters.GeneralConfig
+import com.github.professornik.compareletters.domain.Cache
+import com.github.professornik.compareletters.domain.emptyCache
+import com.github.professornik.compareletters.domain.renderGlyph
 import org.opencv.core.Mat
 import org.opencv.core.MatOfByte
 import org.opencv.core.MatOfPoint
@@ -10,7 +13,7 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 
-data class ComparedTexts(
+data class HuComparedLetters(
     val text1: String,
     val text2: String,
     val huInvariants: Double,
@@ -23,17 +26,17 @@ data class ComparedTexts(
  * @param text2 вторая последовательность
  * @return число большее 0, чем ближе к 0 тем более похожи последовательности
  */
-fun compareTexts(
+fun huCompareLetters(
     text1: String,
     text2: String,
     cache: Cache<String, ContoursWithHierarchy> = emptyCache(),
     config: GeneralConfig
-): ComparedTexts {
+): HuComparedLetters {
     val (contours1, _) = cache(text1) { missed -> findContour(missed, config) }
     val (contours2, _) = cache(text2) { missed -> findContour(missed, config) }
 
     // 4. Сравнение контуров методом моментов HU
-    return ComparedTexts(
+    return HuComparedLetters(
         text1,
         text2,
         Imgproc.matchShapes(contours1[0], contours2[0], Imgproc.CONTOURS_MATCH_I1, 0.0),
@@ -42,7 +45,10 @@ fun compareTexts(
 
 private fun findContour(text: String, config: GeneralConfig): ContoursWithHierarchy {
     // 1. Рендеринг и подготовка изображений
-    val imgColor = renderGlyph(text, config.renderGlyphConfig).toMat()
+    val imgColor = renderGlyph(
+        text,
+        config.renderGlyphConfig
+    ).toMat()
     if (imgColor.empty()) {
         throw IllegalStateException("Не удалось загрузить одно из изображений.")
     }

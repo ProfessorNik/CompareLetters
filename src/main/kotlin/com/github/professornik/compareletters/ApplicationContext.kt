@@ -1,6 +1,6 @@
 package com.github.professornik.compareletters
 
-import com.github.professornik.compareletters.dao.ComparedTextsRepository
+import com.github.professornik.compareletters.domain.compartedletters.ComparedLettersRepository
 import com.github.professornik.compareletters.dao.common.ConnectionProvider
 import com.github.professornik.compareletters.dao.common.DbMigrator
 import com.github.professornik.compareletters.service.CompareLettersService
@@ -12,8 +12,8 @@ class ApplicationContext(
     
     val connectionProvider: ConnectionProvider = ConnectionProvider(generalConfig.dbConfig)
     val migrator: DbMigrator = DbMigrator(generalConfig.dbMigrationConfig, connectionProvider)
-    val comparedTextsRepository: ComparedTextsRepository = ComparedTextsRepository(connectionProvider)
-    val comparedLettersService: CompareLettersService = CompareLettersService(comparedTextsRepository, generalConfig)
+    val comparedLettersRepository: ComparedLettersRepository = ComparedLettersRepository(connectionProvider)
+    val comparedLettersService: CompareLettersService = CompareLettersService(comparedLettersRepository, generalConfig)
     
     fun initContext() {
         migrator.migrate()

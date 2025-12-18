@@ -1,20 +1,36 @@
 package com.github.professornik.compareletters.service
 
 import com.github.professornik.compareletters.GeneralConfig
-import com.github.professornik.compareletters.dao.ComparedTextsRepository
-import com.github.professornik.compareletters.domain.compareTexts
+import com.github.professornik.compareletters.domain.compartedletters.ComparedLetters
+import com.github.professornik.compareletters.domain.compartedletters.ComparedLettersRepository
+import com.github.professornik.compareletters.domain.humoments.huCompareLetters
+import com.github.professornik.compareletters.domain.lettersiter.LettersBatch
+import com.github.professornik.compareletters.domain.vectoranalysisglyphs.vectorAnalysisGlyphs
 
 class CompareLettersService(
-    private val comparedTextsRepository: ComparedTextsRepository,
+    private val comparedLettersRepository: ComparedLettersRepository,
     private val generalConfig: GeneralConfig
 ) {
 
-    fun compareLetters() {
-        val uppercaseLetters = ('A'..'Z').toList()  // A, B, C, ..., Z
-        val lowercaseLetters = ('a'..'z').toList()  // a, b, c, ..., z
+    fun compareLetters(lettersBatch: LettersBatch) {
+        val resultBatch = lettersBatch.map {
+            huCompareLetters(
+                text1 = it.reference,
+                text2 = it.compared,
+                config = generalConfig,
+            )
+        }.map {
+            ComparedLetters(
+                text1 = it.text1,
+                text2 = it.text2,
+                huInvariants = it.huInvariants
+            )
+        }
 
-        val letters = uppercaseLetters + lowercaseLetters
+        comparedLettersRepository.saveBatch(resultBatch)
+    }
 
+    fun testCompare() {
         val allPairs = listOf(
             "р" to "q",
             "ф" to "cp",
@@ -28,19 +44,18 @@ class CompareLettersService(
 
         val pairs = allPairs
 
-        pairs.forEach {
-            println("${it.first} ${it.second} Сравнение контуров=${compareTexts(text1 = it.first, text2 = it.second, config = generalConfig)}")
-//        ImageIO.write(renderGlyph(it.first, config.renderGlyphConfig), "PNG", File("./images/${it.first}.png"));
-//        ImageIO.write(renderGlyph(it.second, config.renderGlyphConfig), "PNG", File("./images/${it.second}.png"));
-        }
-    }
+        Character.getType('a')
 
-    private fun unicodeSequence(): Sequence<String> = sequence {
-        for (codePoint in 0..0x10FFFF) {
-            if (Character.isValidCodePoint(codePoint)) {
-                val chars = Character.toChars(codePoint)
-                yield(String(chars))
-            }
+        pairs.forEach {
+            println(
+                "${it.first} ${it.second} Сравнение контуров=${
+                    huCompareLetters(
+                        text1 = it.first,
+                        text2 = it.second,
+                        config = generalConfig
+                    )
+                } Векторный анализ=${vectorAnalysisGlyphs(target = it.first, composition = it.second, generalConfig.renderGlyphConfig)}"
+            )
         }
     }
 }
